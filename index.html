@@ -2,301 +2,528 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="referrer" content="no-referrer">
-  <title>Administration de mes applications</title>
-  <style>
-    :root {
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      color:#17243a;background:#f3f6fb;
-    }
-    * { box-sizing:border-box }
-    body {
-      margin:0;min-height:100vh;display:grid;
-      place-items:center;padding:20px;
-    }
-    .panel {
-      background:white;border:1px solid #e2e8f0;
-      border-radius:18px;padding:30px;
-      width:min(100%,520px);
-      box-shadow:0 12px 40px #12233b13;
-    }
-    h1 { font-size:1.5rem;margin:0 0 8px }
-    h2 { font-size:1.15rem;margin:25px 0 8px }
-    p { color:#526176;line-height:1.5 }
-    label {
-      display:block;font-weight:600;margin:18px 0 7px;
-    }
-    input {
-      width:100%;border:1px solid #b9c6d8;
-      border-radius:9px;padding:12px;font:inherit;
-    }
-    button {
-      width:100%;margin-top:20px;background:#1557a4;
-      color:white;border:0;border-radius:9px;
-      padding:12px;font:inherit;font-weight:650;
-      cursor:pointer;
-    }
-    button:disabled { opacity:.6;cursor:wait }
-    .muted { font-size:.88rem }
-    .error { color:#a52b32 }
-    .success { color:#17673d }
-    .app {
-      padding:12px 14px;background:#f3f6fb;
-      border-radius:9px;margin-top:10px;
-    }
-    #dashboard { display:none }
-    #message,#inviteMessage { min-height:1.4em }
-    #signout { background:#e8eef7;color:#19395f }
-    .section {
-      border-top:1px solid #e2e8f0;
-      margin-top:25px;padding-top:5px;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Administration de mes applications</title>
+<style>
+:root {
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  color:#17243a;background:#f3f6fb;
+}
+* { box-sizing:border-box }
+body {
+  margin:0;min-height:100vh;display:grid;
+  place-items:center;padding:20px;
+}
+.panel {
+  background:white;border:1px solid #e2e8f0;
+  border-radius:18px;padding:30px;
+  width:min(100%,600px);
+  box-shadow:0 12px 40px #12233b13;
+}
+h1 { font-size:1.5rem;margin:0 0 8px }
+h2 { font-size:1.15rem;margin:25px 0 8px }
+p { color:#526176;line-height:1.5 }
+label {
+  display:block;font-weight:600;margin:18px 0 7px;
+}
+input,select {
+  width:100%;border:1px solid #b9c6d8;
+  border-radius:9px;padding:12px;font:inherit;
+  background:white;
+}
+button {
+  width:100%;margin-top:16px;background:#1557a4;
+  color:white;border:0;border-radius:9px;
+  padding:12px;font:inherit;font-weight:650;
+  cursor:pointer;
+}
+button:disabled { opacity:.6;cursor:wait }
+.muted { font-size:.88rem }
+.error { color:#a52b32 }
+.success { color:#17673d }
+.app {
+  padding:12px 14px;background:#f3f6fb;
+  border-radius:9px;margin-top:10px;
+}
+.section {
+  border-top:1px solid #e2e8f0;
+  margin-top:25px;padding-top:5px;
+}
+.access {
+  padding:15px;background:#f3f6fb;
+  border-radius:10px;margin-top:12px;
+}
+.access strong { display:block;margin-bottom:8px }
+.access p { margin:8px 0 }
+.actions {
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.actions button { margin-top:10px }
+.danger { background:#a52b32 }
+#dashboard { display:none }
+#message,#inviteMessage,#accessMessage {
+  min-height:1.4em;
+}
+#signout { background:#e8eef7;color:#19395f }
+</style>
 </head>
 <body>
-  <main class="panel">
-    <section id="login">
-      <h1>Administration des applications</h1>
-      <p>Connexion réservée aux administrateurs autorisés.</p>
-      <form id="loginForm">
-        <label for="email">Adresse e-mail</label>
-        <input id="email" type="email"
-          autocomplete="username" required>
-        <label for="password">Mot de passe</label>
-        <input id="password" type="password"
-          autocomplete="current-password" required>
-        <button id="submit" type="submit">
-          Se connecter
-        </button>
-      </form>
-    </section>
+<main class="panel">
 
-    <section id="dashboard">
-      <h1>Tableau de bord administrateur</h1>
-      <p id="welcome"></p>
+<section id="login">
+  <h1>Administration des applications</h1>
+  <p>Connexion réservée aux administrateurs autorisés.</p>
+  <form id="loginForm">
+    <label for="email">Adresse e-mail</label>
+    <input id="email" type="email"
+      autocomplete="username" required>
+    <label for="password">Mot de passe</label>
+    <input id="password" type="password"
+      autocomplete="current-password" required>
+    <button id="submit" type="submit">Se connecter</button>
+  </form>
+</section>
 
-      <div class="app">⚖️ Juge Consulaire</div>
-      <div class="app">📘 My American Vocabulary</div>
+<section id="dashboard">
+  <h1>Tableau de bord administrateur</h1>
+  <p id="welcome"></p>
 
-      <div class="section">
-        <h2>Inviter un utilisateur</h2>
-        <p>
-          Saisis l'adresse e-mail de la personne à inviter.
-          Elle recevra un lien pour activer son compte.
-        </p>
+  <div class="app">⚖️ Juge Consulaire</div>
+  <div class="app">📘 My American Vocabulary</div>
 
-        <form id="inviteForm">
-          <label for="inviteEmail">
-            Adresse e-mail de l'utilisateur
-          </label>
-          <input id="inviteEmail" type="email"
-            autocomplete="off" required>
-
-          <button id="inviteSubmit" type="submit">
-            Envoyer une invitation
-          </button>
-        </form>
-
-        <p id="inviteMessage" role="status"
-          aria-live="polite"></p>
-      </div>
-
-      <p class="muted">
-        La gestion des autorisations par application et
-        des appareils sera ajoutée prochainement.
-      </p>
-
-      <button id="signout" type="button">
-        Se déconnecter
+  <div class="section">
+    <h2>Inviter un utilisateur</h2>
+    <p>
+      Saisis l'adresse e-mail de la personne à inviter.
+      Elle recevra un lien pour activer son compte.
+    </p>
+    <form id="inviteForm">
+      <label for="inviteEmail">Adresse e-mail</label>
+      <input id="inviteEmail" type="email"
+        autocomplete="off" required>
+      <button id="inviteSubmit" type="submit">
+        Envoyer une invitation
       </button>
-    </section>
-
-    <p id="message" role="status"
+    </form>
+    <p id="inviteMessage" role="status"
       aria-live="polite"></p>
-  </main>
+  </div>
 
-  <script type="module">
-    import { createClient } from
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  <div class="section">
+    <h2>Gestion des autorisations</h2>
+    <p>
+      Sélectionne un utilisateur, puis accorde ou retire
+      l'accès à chaque application.
+    </p>
 
-    const SUPABASE_URL =
-      'https://fkcdxxoqjmsmgxfehrmb.supabase.co';
+    <label for="userSelect">Utilisateur</label>
+    <select id="userSelect">
+      <option value="">Chargement des utilisateurs…</option>
+    </select>
 
-    const SUPABASE_KEY =
-      'sb_publishable_WDWVJeFxWlhgjFQar2RjuA_HOyWBanF';
+    <button id="refreshUsers" type="button">
+      Actualiser la liste
+    </button>
 
-    const supabase = createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
+    <label for="expiresAt">
+      Date d'expiration (facultative)
+    </label>
+    <input id="expiresAt" type="date">
+    <p class="muted">
+      Laisse ce champ vide pour un accès sans date
+      d'expiration. Une autorisation peut toujours
+      être retirée ultérieurement.
+    </p>
+
+    <div class="access">
+      <strong>⚖️ Juge Consulaire</strong>
+      <p id="statusJuge">Statut : à vérifier</p>
+      <div class="actions">
+        <button type="button"
+          data-app="juge_consulaire"
+          data-active="true">
+          Autoriser
+        </button>
+        <button type="button" class="danger"
+          data-app="juge_consulaire"
+          data-active="false">
+          Retirer
+        </button>
+      </div>
+    </div>
+
+    <div class="access">
+      <strong>📘 My American Vocabulary</strong>
+      <p id="statusVocab">Statut : à vérifier</p>
+      <div class="actions">
+        <button type="button"
+          data-app="american_vocabulary"
+          data-active="true">
+          Autoriser
+        </button>
+        <button type="button" class="danger"
+          data-app="american_vocabulary"
+          data-active="false">
+          Retirer
+        </button>
+      </div>
+    </div>
+
+    <p id="accessMessage" role="status"
+      aria-live="polite"></p>
+  </div>
+
+  <button id="signout" type="button">
+    Se déconnecter
+  </button>
+</section>
+
+<p id="message" role="status" aria-live="polite"></p>
+
+</main>
+
+<script type="module">
+import { createClient } from
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const supabase = createClient(
+  'https://fkcdxxoqjmsmgxfehrmb.supabase.co',
+  'sb_publishable_WDWVJeFxWlhgjFQar2RjuA_HOyWBanF'
+);
+
+const $ = id => document.getElementById(id);
+const APP_NAMES = {
+  juge_consulaire: 'Juge Consulaire',
+  american_vocabulary: 'My American Vocabulary'
+};
+
+let accessRequest = 0;
+
+function setMessage(id, text, error = false) {
+  $(id).textContent = text;
+  $(id).className = error ? 'error' : 'success';
+}
+
+function showLogin() {
+  $('login').style.display = '';
+  $('dashboard').style.display = 'none';
+}
+
+function showDashboard(email) {
+  $('login').style.display = 'none';
+  $('dashboard').style.display = 'block';
+  $('welcome').textContent = `Connecté : ${email}`;
+  setMessage('message', 'Accès administrateur confirmé.');
+}
+
+async function verifyAdmin() {
+  const { data: userData, error: userError } =
+    await supabase.auth.getUser();
+
+  if (userError || !userData.user) {
+    showLogin();
+    return;
+  }
+
+  const { data, error } =
+    await supabase.rpc('is_app_admin');
+
+  if (error || data !== true) {
+    await supabase.auth.signOut();
+    showLogin();
+    setMessage(
+      'message',
+      error
+        ? 'Vérification administrateur indisponible.'
+        : 'Ce compte ne possède pas les droits administrateur.',
+      true
     );
+    return;
+  }
 
-    const $ = (id) => document.getElementById(id);
+  showDashboard(userData.user.email || 'administrateur');
+  await loadUsers();
+}
 
-    const message = (text, error = false) => {
-      $('message').textContent = text;
-      $('message').className = error ? 'error' : 'success';
-    };
+async function loadUsers() {
+  const previous = $('userSelect').value;
+  $('userSelect').replaceChildren(
+    new Option('Chargement…', '')
+  );
 
-    const inviteMessage = (text, error = false) => {
-      $('inviteMessage').textContent = text;
-      $('inviteMessage').className =
-        error ? 'error' : 'success';
-    };
+  const { data, error } =
+    await supabase.rpc('list_app_users');
 
-    const showLogin = () => {
-      $('login').style.display = '';
-      $('dashboard').style.display = 'none';
-    };
+  if (error) {
+    $('userSelect').replaceChildren(
+      new Option('Liste indisponible', '')
+    );
+    setMessage(
+      'accessMessage',
+      'Impossible de charger les utilisateurs : ' +
+      error.message,
+      true
+    );
+    return;
+  }
 
-    const showDashboard = (email) => {
-      $('login').style.display = 'none';
-      $('dashboard').style.display = 'block';
-      $('welcome').textContent = `Connecté : ${email}`;
-      message('Accès administrateur confirmé.');
-    };
+  const users = data || [];
+  $('userSelect').replaceChildren(
+    new Option('Choisir un utilisateur', '')
+  );
 
-    async function verifyAdmin() {
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
+  for (const user of users) {
+    $('userSelect').add(
+      new Option(user.email || user.user_id, user.user_id)
+    );
+  }
 
-      if (userError || !userData.user) {
-        showLogin();
-        return;
+  if (users.some(u => u.user_id === previous)) {
+    $('userSelect').value = previous;
+  }
+
+  await loadAccess();
+}
+
+async function loadAccess() {
+  const request = ++accessRequest;
+  const userId = $('userSelect').value;
+
+  $('statusJuge').textContent = 'Statut : à vérifier';
+  $('statusVocab').textContent = 'Statut : à vérifier';
+
+  if (!userId) {
+    setMessage('accessMessage', '');
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('app_access')
+    .select('application,is_active,expires_at')
+    .eq('user_id', userId);
+
+  if (request !== accessRequest ||
+      userId !== $('userSelect').value) return;
+
+  if (error) {
+    setMessage(
+      'accessMessage',
+      'Lecture des autorisations impossible : ' +
+      error.message,
+      true
+    );
+    return;
+  }
+
+  const rows = data || [];
+
+  for (const [app, elementId] of [
+    ['juge_consulaire', 'statusJuge'],
+    ['american_vocabulary', 'statusVocab']
+  ]) {
+    const row = rows.find(r => r.application === app);
+    let status = 'Non autorisé';
+
+    if (row?.is_active) {
+      if (row.expires_at &&
+          new Date(row.expires_at) <= new Date()) {
+        status = 'Expiré';
+      } else {
+        status = row.expires_at
+          ? 'Autorisé jusqu’au ' +
+            new Date(row.expires_at).toLocaleDateString('fr-FR')
+          : 'Autorisé sans expiration';
       }
+    }
 
-      const { data, error } =
-        await supabase.rpc('is_app_admin');
+    $(elementId).textContent = 'Statut : ' + status;
+  }
 
-      if (error || data !== true) {
-        await supabase.auth.signOut();
-        showLogin();
-        message(
-          error
-            ? 'Vérification administrateur indisponible.'
-            : 'Ce compte ne possède pas les droits administrateur.',
+  setMessage('accessMessage', '');
+}
+
+$('loginForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  $('submit').disabled = true;
+  setMessage('message', '');
+
+  try {
+    const { error } =
+      await supabase.auth.signInWithPassword({
+        email: $('email').value.trim(),
+        password: $('password').value
+      });
+
+    $('password').value = '';
+
+    if (error) {
+      setMessage(
+        'message',
+        'Connexion impossible. Vérifie tes identifiants.',
+        true
+      );
+      return;
+    }
+
+    await verifyAdmin();
+  } catch {
+    setMessage(
+      'message',
+      'Erreur de connexion au service.',
+      true
+    );
+  } finally {
+    $('submit').disabled = false;
+  }
+});
+
+$('inviteForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  $('inviteSubmit').disabled = true;
+  setMessage(
+    'inviteMessage',
+    'Envoi de l’invitation en cours…'
+  );
+
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    if (sessionError ||
+        !sessionData.session?.access_token) {
+      throw new Error('Session expirée. Reconnecte-toi.');
+    }
+
+    const { data, error } =
+      await supabase.functions.invoke('invite-user', {
+        body: {
+          email: $('inviteEmail').value.trim()
+        },
+        headers: {
+          Authorization:
+            `Bearer ${sessionData.session.access_token}`
+        }
+      });
+
+    if (error || !data?.success) {
+      throw new Error(
+        data?.error || error?.message ||
+        'Invitation impossible.'
+      );
+    }
+
+    $('inviteEmail').value = '';
+    setMessage(
+      'inviteMessage',
+      'Invitation envoyée avec succès !'
+    );
+    await loadUsers();
+  } catch (error) {
+    setMessage(
+      'inviteMessage',
+      'Erreur : ' + (error?.message || 'Erreur inconnue'),
+      true
+    );
+  } finally {
+    $('inviteSubmit').disabled = false;
+  }
+});
+
+$('userSelect').addEventListener('change', loadAccess);
+$('refreshUsers').addEventListener('click', loadUsers);
+
+document.querySelectorAll('[data-app]').forEach(button => {
+  button.addEventListener('click', async () => {
+    const userId = $('userSelect').value;
+
+    if (!userId) {
+      setMessage(
+        'accessMessage',
+        'Sélectionne d’abord un utilisateur.',
+        true
+      );
+      return;
+    }
+
+    const application = button.dataset.app;
+    const isActive = button.dataset.active === 'true';
+    const date = $('expiresAt').value;
+
+    let expiresAt = null;
+
+    if (isActive && date) {
+      expiresAt = new Date(
+        date + 'T23:59:59'
+      ).toISOString();
+
+      if (new Date(expiresAt) <= new Date()) {
+        setMessage(
+          'accessMessage',
+          'Choisis une date d’expiration future.',
           true
         );
         return;
       }
-
-      showDashboard(
-        userData.user.email || 'administrateur'
-      );
     }
 
-    $('loginForm').addEventListener(
-      'submit',
-      async (event) => {
-        event.preventDefault();
-        $('submit').disabled = true;
-        message('');
+    if (!isActive && !confirm(
+      `Retirer l’accès à ${APP_NAMES[application]} ?`
+    )) return;
 
-        try {
-          const { error } =
-            await supabase.auth.signInWithPassword({
-              email: $('email').value.trim(),
-              password: $('password').value
-            });
+    button.disabled = true;
+    setMessage('accessMessage', 'Enregistrement…');
 
-          $('password').value = '';
-
-          if (error) {
-            message(
-              'Connexion impossible. Vérifie tes identifiants et la confirmation de ton e-mail.',
-              true
-            );
-            return;
-          }
-
-          await verifyAdmin();
-        } catch {
-          message(
-            'Erreur de connexion au service. Réessaie.',
-            true
-          );
-        } finally {
-          $('submit').disabled = false;
+    try {
+      const { error } = await supabase.rpc(
+        'set_app_access',
+        {
+          p_user_id: userId,
+          p_application: application,
+          p_is_active: isActive,
+          p_expires_at: expiresAt
         }
-      }
-    );
+      );
 
-    $('inviteForm').addEventListener(
-      'submit',
-      async (event) => {
-        event.preventDefault();
+      if (error) throw error;
 
-        const email =
-          $('inviteEmail').value.trim();
-
-        $('inviteSubmit').disabled = true;
-        inviteMessage('Envoi de l’invitation en cours…');
-
-        try {
-          const { data: sessionData, error: sessionError } =
-            await supabase.auth.getSession();
-
-          if (sessionError ||
-              !sessionData.session?.access_token) {
-            throw new Error(
-              'Session expirée. Reconnecte-toi.'
-            );
-          }
-
-          const { data, error } =
-            await supabase.functions.invoke(
-              'invite-user',
-              {
-                body: { email },
-                headers: {
-                  Authorization:
-                    `Bearer ${sessionData.session.access_token}`
-                }
-              }
-            );
-
-          if (error || !data?.success) {
-            throw new Error(
-              data?.error ||
-              error?.message ||
-              'Invitation impossible.'
-            );
-          }
-
-          $('inviteEmail').value = '';
-          inviteMessage(
-            'Invitation envoyée avec succès !'
-          );
-        } catch (error) {
-          inviteMessage(
-            'Erreur : ' +
-            (error?.message || 'Erreur inconnue'),
-            true
-          );
-        } finally {
-          $('inviteSubmit').disabled = false;
-        }
-      }
-    );
-
-    $('signout').addEventListener(
-      'click',
-      async () => {
-        await supabase.auth.signOut();
-        showLogin();
-        inviteMessage('');
-        message('Déconnexion effectuée.');
-      }
-    );
-
-    verifyAdmin().catch(() => {
-      showLogin();
-      message(
-        'Service temporairement indisponible.',
+      await loadAccess();
+      setMessage(
+        'accessMessage',
+        isActive
+          ? 'Autorisation enregistrée.'
+          : 'Autorisation retirée.'
+      );
+    } catch (error) {
+      setMessage(
+        'accessMessage',
+        'Erreur : ' + (error?.message || 'Erreur inconnue'),
         true
       );
-    });
-  </script>
+    } finally {
+      button.disabled = false;
+    }
+  });
+});
+
+$('signout').addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  showLogin();
+  $('userSelect').replaceChildren();
+  setMessage('inviteMessage', '');
+  setMessage('accessMessage', '');
+  setMessage('message', 'Déconnexion effectuée.');
+});
+
+verifyAdmin().catch(() => {
+  showLogin();
+  setMessage(
+    'message',
+    'Service temporairement indisponible.',
+    true
+  );
+});
+</script>
 </body>
 </html>
