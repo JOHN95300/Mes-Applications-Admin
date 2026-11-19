@@ -1,0 +1,213 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activation de compte — Mes Applications</title>
+<style>
+:root {
+  font-family: system-ui, sans-serif;
+  color: #172b4d;
+  background: #f3f6fb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.panel {
+  background: white;
+  border: 1px solid #e1e7ef;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px #172b4d12;
+  width: min(100%, 460px);
+  padding: 30px;
+}
+h1 { font-size: 1.45rem; }
+p { color: #52637c; line-height: 1.5; }
+label {
+  display: block;
+  margin: 18px 0 7px;
+  font-weight: 600;
+}
+input, button {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  font: inherit;
+}
+input { border: 1px solid #b8c5d5; }
+button {
+  background: #153b66;
+  color: white;
+  border: 0;
+  font-weight: 700;
+  margin-top: 20px;
+  cursor: pointer;
+}
+button:disabled { opacity: .6; }
+.status { margin-top: 16px; min-height: 24px; }
+.error { color: #a32121; }
+.success { color: #14603b; }
+.hint { font-size: .85rem; }
+</style>
+</head>
+<body>
+<main class="panel">
+  <h1>🔐 Activer mon compte</h1>
+  <p>
+    Cette page est réservée aux personnes ayant reçu
+    une invitation. Choisissez un mot de passe.
+  </p>
+
+  <form id="form" hidden>
+    <label for="password">Nouveau mot de passe</label>
+    <input id="password" type="password"
+      minlength="12" autocomplete="new-password" required>
+
+    <label for="confirm">Confirmer le mot de passe</label>
+    <input id="confirm" type="password"
+      minlength="12" autocomplete="new-password" required>
+
+    <button id="submit" type="submit">
+      Définir mon mot de passe
+    </button>
+  </form>
+
+  <p id="status" class="status" role="status">
+    Vérification de votre invitation…
+  </p>
+
+  <p class="hint">
+    Si votre lien est expiré, contactez l'administrateur.
+  </p>
+</main>
+
+<script type="module">
+import { createClient } from
+  'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  'https://fkcdxxoqjmsmgxfehrmb.supabase.co',
+  'sb_publishable_WDWVJeFxWlhgjFQar2RjuA_HOyWBanF',
+  {
+    auth: {
+      detectSessionInUrl: true,
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  }
+);
+
+const form = document.getElementById('form');
+const status = document.getElementById('status');
+const submit = document.getElementById('submit');
+
+function message(text, kind = '') {
+  status.textContent = text;
+  status.className = 'status ' + kind;
+}
+
+async function init() {
+  try {
+    const url = new URL(location.href);
+    const code = url.searchParams.get('code');
+    const tokenHash = url.searchParams.get('token_hash');
+    const type = url.searchParams.get('type');
+
+    if (code) {
+      const { error } =
+        await supabase.auth.exchangeCodeForSession(code);
+      if (error) throw error;
+    } else if (tokenHash && type === 'invite') {
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: 'invite'
+      });
+      if (error) throw error;
+    } else if (location.hash.includes('access_token=')) {
+      const params = new URLSearchParams(location.hash.slice(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+
+      if (!access_token || !refresh_token) {
+        throw new Error('Lien incomplet');
+      }
+
+      const { error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token
+      });
+      if (error) throw error;
+    }
+
+    const { data: { user }, error } =
+      await supabase.auth.getUser();
+
+    if (error || !user) {
+      throw new Error('Invitation invalide ou expirée');
+    }
+
+    history.replaceState({}, '', location.pathname);
+    form.hidden = false;
+    message('Invitation vérifiée. Définissez votre mot de passe.');
+  } catch (e) {
+    form.hidden = true;
+    message(
+      'Impossible de vérifier l’invitation. Demandez un nouveau lien.',
+      'error'
+    );
+  }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const password =
+    document.getElementById('password').value;
+  const confirm =
+    document.getElementById('confirm').value;
+
+  if (password !== confirm) {
+    message('Les mots de passe ne correspondent pas.', 'error');
+    return;
+  }
+
+  if (password.length < 12) {
+    message('Utilisez au moins 12 caractères.', 'error');
+    return;
+  }
+
+  submit.disabled = true;
+  message('Enregistrement en cours…');
+
+  try {
+    const { error } =
+      await supabase.auth.updateUser({ password });
+
+    if (error) throw error;
+
+    await supabase.auth.signOut();
+    form.hidden = true;
+    message(
+      'Compte activé. Vous pourrez vous connecter lorsque votre accès aura été autorisé.',
+      'success'
+    );
+  } catch (e) {
+    message(
+      'Erreur : ' + (e?.message || 'Erreur inconnue'),
+      'error'
+    );
+  } finally {
+    submit.disabled = false;
+  }
+});
+
+init();
+</script>
+</body>
+</html>
